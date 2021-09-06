@@ -1,0 +1,27 @@
+import mysql.connector
+
+# Connecting to the database, Enter your SQL details
+mydb = mysql.connector.connect(
+  host="localhost",
+  user="root",
+  password="Aa123456",
+  # database = "mydatabase" #Use this line AFTER first initiation.
+)
+# We need a cursor in order to submit a command to command line in SQL
+mycursor = mydb.cursor()
+
+# Create a new DATABASE in SQL.
+mycursor.execute("CREATE DATABASE mydatabase") #Use this line when first initiated.
+# mycursor.execute("CREATE TABLE users (name VARCHAR(255), password VARCHAR(255), details VARCHAR(255))")
+
+# # Adding a few peoples
+# sql = "INSERT INTO users (name, password, details) VALUES (%s, %s , %s)"
+# val = [
+#   ('Shay', '1234','Something About me'),
+#   ('Gal', 'aaa','Random Text'),
+#   ('Tal', 'bbb','Good Good')
+# ]
+# mycursor.executemany(sql, val)
+mydb.commit()
+
+print("Initiated DataBase First")

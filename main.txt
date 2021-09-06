@@ -1,0 +1,141 @@
+import mysql.connector
+import tkinter as tk
+import webbrowser
+
+global details_label,username,entry
+
+# ----------------------------------------General Functions-----------------------------------------------
+LARGE_FONT= ("Verdana", 12)
+NORM_FONT = ("Helvetica", 10)
+SMALL_FONT = ("Helvetica", 8)
+
+# Puts the window in the center of the screen
+def centerMe(myWindow,offsetX,offsetY):
+
+    windowWidth = myWindow.winfo_reqwidth()
+    windowHeight = myWindow.winfo_reqheight()
+    positionRight = int(myWindow.winfo_screenwidth() / 2 - windowWidth / 2)
+    positionDown = int(myWindow.winfo_screenheight() / 2 - windowHeight / 2)
+
+    # Positions the window in the center of the page.
+    myWindow.geometry("+{}+{}".format(positionRight - offsetX, positionDown - offsetY))
+
+# Pop Up message
+def popupmsg(msg):
+    popup = tk.Tk()
+    popup.wm_title("Incorrect Details")
+    popup['background'] = background_mainColor
+    label = tk.Label(popup, text=msg, font=NORM_FONT, fg= entry_color,  bg = background_mainColor)
+    label.pack(side="top", fill="x", pady=2,padx = 10)
+    label.config(font=("Arial", 16,'bold'))
+    centerMe(popup,118,0)
+    B1 = tk.Button(popup, text="Continue", command = popup.destroy, fg= background_mainColor,  bg = second_text_color)
+    B1.pack(padx = 22,pady = 5)
+    popup.mainloop()
+
+def open_url(url):
+    webbrowser.open_new_tab(url)
+
+# ----------------------------------------Connecting to DB----------------------------------------
+
+# Connecting to the database
+def connect_to_db():
+    mydb = mysql.connector.connect(
+      host="localhost",
+      user="root",
+      password="Aa123456",
+      database = "mydatabase"
+    )
+# We need a cursor in order to submit a command to command line in SQL
+    return mydb
+
+# Submit Button
+def login():
+    # Takes details from entries
+    username = entry.get()
+    password = entry_password.get()
+    sql = "SELECT * FROM users WHERE name ='"+username+"' AND password = '"+password+"'     "
+
+    # Execution of query to MySQL
+    mycursor = mydb.cursor()
+    mycursor.execute(sql)
+    myresult = mycursor.fetchall()
+
+    # In case the result of the query is null, tell the user.
+    if myresult == []:
+        popupmsg("Username or Password incorrect")
+        return
+
+    updateDetails(myresult)
+    popupmsg("Hello " + myresult[0][0] + "!\n" + myresult[0][2])
+
+def updateDetails(result):
+
+    details_label = tk.Label(text=result[0][0] + " is logged in",fg="yellow",bg="#333",width=30,height=1)
+    details_label.config(font=("Arial", 11), pady=15)
+    details_label.grid(row=8)
+
+# Code starts from here
+# ------------------------------------------------- GUI ------------------------------------------
+mydb = connect_to_db()
+
+background_mainColor = "#333"
+entry_color = "white"
+main_text_color = "#48A36F"
+second_text_color = "#387D56"
+
+# ------------- Window's Settings ------------------
+window = tk.Tk() #GUI START
+window.geometry("470x500")
+window['background']= background_mainColor
+centerMe(window,180,200)
+
+# ------------- Headline Label ---------------------
+label = tk.Label(text="Software Name",fg= main_text_color,bg = background_mainColor,width=15,height=1)
+label.config(font=("Arial", 32),padx=50, pady=20)
+label.grid(row = 0, column = 0)
+
+# ------------- Login Label  ---------------------
+enterDetailsLabel = tk.Label(text="Login",    fg=second_text_color,    bg=background_mainColor,    width=15,    height=1)
+enterDetailsLabel.config(font=("Arial", 16,'bold'))
+enterDetailsLabel.grid(row = 1, column = 0)
+
+# ------------- UserName Label ---------------------
+enter_user_name_label = tk.Label(text="User Name:",    fg="white",    bg=background_mainColor,    width=15,    height=1)
+enter_user_name_label.config(font=("Arial", 16))
+enter_user_name_label.grid(row = 2,pady = 11)
+
+# ------------- UserName Input ---------------------
+entry = tk.Entry(fg="black", bg= entry_color, width=50)
+entry.grid(row = 3)
+
+# ------------- Password Label ---------------------
+# password = StringVar()
+enter_password_label = tk.Label(text="Password:", fg="white",    bg=background_mainColor,    width=15,    height=1)
+enter_password_label.config(font=("Arial", 16))
+enter_password_label.grid(row = 4,pady = 11)
+
+# ------------- Password Input ---------------------
+entry_password = tk.Entry(fg="black",bg= entry_color,width=50,show="*",)
+entry_password.grid(row = 5)
+
+# ------------- Submit Button ---------------------
+button = tk.Button(text="Submit",width=20,    height=4,    fg=background_mainColor,    bg=main_text_color,    command = login)
+button.grid(row = 6, column = 0,pady = 22)
+
+# ------------- Create Account Label --------------
+create_new_label = tk.Label(   text="Click here to create a new account",    fg="white",    bg=background_mainColor,    width=30,    height=1,    cursor= "hand2")
+url= 'https://shaymaryuma.000webhostapp.com/'
+create_new_label.bind("<Button-1>", lambda e:open_url(url))
+create_new_label.config(font=("Arial", 11,'underline'))
+create_new_label.grid(row = 7)
+
+# ------------- NewDetails Label -----------------
+details_label = tk.Label(    text="Details",    fg="yellow",    bg=background_mainColor,    width=30,    height=1,)
+details_label.config(font=("Arial", 11),pady = 15)
+details_label.grid(row = 8)
+
+# ------------- Window Ends ----------------------
+window.mainloop() #GUI END
+
+
